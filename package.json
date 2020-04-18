@@ -11,6 +11,8 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "fs": "0.0.1-security",
+    "minimist": "^1.2.5",
+    "osrm": "^5.22.0",
     "request": "^2.88.2",
     "sync-request": "^6.1.0"
   }

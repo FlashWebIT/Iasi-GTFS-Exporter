@@ -1,5 +1,6 @@
 var fs = require('fs'),
     cheerio = require('cheerio'),
+    shell = require('child_process'),
     request = require('sync-request');
 
 const util = require('util');
@@ -35,7 +36,9 @@ var data = {
     "calendar": [
         "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date",
         "LV,1,1,1,1,1,0,0,20200301,20201230",
-        "SD,0,0,0,0,0,1,1,20200301,20201230"
+        "SD,0,0,0,0,0,1,1,20200301,20201230",
+        "S,0,0,0,0,0,1,0,20200301,20201230",
+        "D,0,0,0,0,0,0,1,20200301,20201230"
     ],
     "calendar_dates": [
         "service_id,date,exception_type"
@@ -53,8 +56,8 @@ gdata = request('GET', routeList);
 $ = cheerio.load(gdata.getBody('utf8'));
 
 var localStopMatch={};
-
-function processRoute(id){
+// a trip can have multiple frequencies but not multiple schedules! Beware
+function processRoute(id,type){
 	console.log('Processing route '+id);
 	var ldata = request('GET', apiURL+"route/byId/"+id);
 	ldata = JSON.parse(ldata.getBody('utf8'));
@@ -62,7 +65,14 @@ function processRoute(id){
 	if(ldata.data.routeWayLength){
 		if(!localStopMatch[id]) localStopMatch[id] = [];
 		localStopMatch[id][0] = ldata.data.routeWaypoints;
+		dat = new Date(0);
+		console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeWaypoints[0].name);
 		for (var i = 0; i < ldata.data.routeWaypoints.length; i++) {
+			if(i!=ldata.data.routeWaypoints.length-1){
+				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeWaypoints[i].lng)+" "+parseFloat(ldata.data.routeWaypoints[i].lat)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lat)).toString();
+			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 5);
+			    console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeWaypoints[i+1].name);
+			}
 			if(ldata.data.routeWaypoints[i].stationID&&!stopInList(ldata.data.routeWaypoints[i].stationID))
 				data.stops.push(ldata.data.routeWaypoints[i].stationID+","+ldata.data.routeWaypoints[i].name+",,"+ldata.data.routeWaypoints[i].lat+","+ldata.data.routeWaypoints[i].lng);
 		}
@@ -72,8 +82,16 @@ function processRoute(id){
 	}
 	if(ldata.data.routeRoundWayLength){
 		if(!localStopMatch[id]) localStopMatch[id] = [];
+		localStopMatch[id][0] = ldata.data.routeWaypoints;
+		dat = new Date(0);
+		console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeWaypoints[0].name);
 		localStopMatch[id][1] = ldata.data.routeRoundWaypoints;
 		for (var i = 0; i < ldata.data.routeRoundWaypoints.length; i++) {
+			if(i!=ldata.data.routeRoundWaypoints.length-1){
+				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeRoundWaypoints[i].lng)+" "+parseFloat(ldata.data.routeRoundWaypoints[i].lat)+" "+parseFloat(ldata.data.routeRoundWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeRoundWaypoints[i+1].lat)).toString();
+			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 5);
+			    console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeRoundWaypoints[i+1].name);
+			}
 			if(ldata.data.routeRoundWaypoints[i].stationID&&!stopInList(ldata.data.routeRoundWaypoints[i].stationID))
 				data.stops.push(ldata.data.routeRoundWaypoints[i].stationID+","+ldata.data.routeRoundWaypoints[i].name+",,"+ldata.data.routeRoundWaypoints[i].lat+","+ldata.data.routeRoundWaypoints[i].lng);
 		}
@@ -92,8 +110,12 @@ $('.autobuze').find('ul').find('li').each(function(){
 })
 
 for (var i = 1; i < data.routes.length; i++) {
-	processRoute(data.routes[i].split(',')[0]);
+	processRoute(data.routes[i].split(',')[0],data.routes[i].split(',')[3]);
 }
+
+//processRoute(data.routes[1].split(',')[0],data.routes[1].split(',')[3]);
+//processRoute(data.routes[2].split(',')[0],data.routes[2].split(',')[3]);
+//processRoute(data.routes[10].split(',')[0],data.routes[10].split(',')[3]);
 
 function msToHMS(ms) {
     var seconds = ms / 1000;
@@ -107,12 +129,12 @@ function msToHMS(ms) {
 dirn = start.getTime();
 
 if (!fs.existsSync("./output/" + dirn)) {
-    console.log("Creating output subdirectory " + dirn);
-    fs.mkdirSync("./output/" + dirn);
+    //console.log("Creating output subdirectory " + dirn);
+    //fs.mkdirSync("./output/" + dirn);
 }
 
 for (property in data) {
-    fs.writeFileSync("./output/" + dirn + "/" + property + ".txt", data[property].join("\r\n"));
+    //fs.writeFileSync("./output/" + dirn + "/" + property + ".txt", data[property].join("\r\n"));
 }
 
 now = new Date();
