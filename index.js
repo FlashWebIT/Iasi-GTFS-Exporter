@@ -90,6 +90,7 @@ function processRoute(id,type,url){
     if(!(ldata.type&&$$(".frecventa")&&$$(".prima-cursa")&&$$(".ultima-cursa"))) return false;
 	
 	if(ldata.data.routeWayLength&&ldata.data.routeWaypoints.length){
+        var tid;
 		if(!localStopMatch[id]) localStopMatch[id] = [];
 		localStopMatch[id][0] = ldata.data.routeWaypoints;
 
@@ -184,7 +185,7 @@ function processRoute(id,type,url){
 				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeWaypoints[i].lng)+" "+parseFloat(ldata.data.routeWaypoints[i].lat)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lat)).toString();
 			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 20);
                 d = dat.toLocaleTimeString("ro-RO").replace(" AM","")
-			    if(ldata.data.routeWaypoints[i+1].stationID) data.stop_times.push(id+"TLV"+","+d+","+d+","+ldata.data.routeWaypoints[i+1].stationID+","+(i+2));
+			    if(ldata.data.routeWaypoints[i+1].stationID) data.stop_times.push(tid+","+d+","+d+","+ldata.data.routeWaypoints[i+1].stationID+","+(i+2));
 			}
 			if(ldata.data.routeWaypoints[i].stationID&&!stopInList(ldata.data.routeWaypoints[i].stationID))
 				data.stops.push(ldata.data.routeWaypoints[i].stationID+","+ldata.data.routeWaypoints[i].name+",,"+ldata.data.routeWaypoints[i].lat+","+ldata.data.routeWaypoints[i].lng);
@@ -194,6 +195,7 @@ function processRoute(id,type,url){
 		}
 	}
 	if(ldata.data.routeRoundWayLength&&ldata.data.routeRoundWaypoints.length){
+        var tid;
 		if(!localStopMatch[id]) localStopMatch[id] = [];
 		localStopMatch[id][0] = ldata.data.routeWaypoints;
 
@@ -289,7 +291,7 @@ function processRoute(id,type,url){
 				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeRoundWaypoints[i].lng)+" "+parseFloat(ldata.data.routeRoundWaypoints[i].lat)+" "+parseFloat(ldata.data.routeRoundWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeRoundWaypoints[i+1].lat)).toString();
 			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 5);
                 d = dat.toLocaleTimeString("ro-RO").replace(" AM","");
-			    if(ldata.data.routeRoundWaypoints[i+1].stationID) data.stop_times.push(id+"RLV"+","+d+","+d+","+ldata.data.routeRoundWaypoints[i+1].stationID+","+(i+2));
+			    if(ldata.data.routeRoundWaypoints[i+1].stationID) data.stop_times.push(tid+","+d+","+d+","+ldata.data.routeRoundWaypoints[i+1].stationID+","+(i+2));
 			}
 			if(ldata.data.routeRoundWaypoints[i].stationID&&!stopInList(ldata.data.routeRoundWaypoints[i].stationID))
 				data.stops.push(ldata.data.routeRoundWaypoints[i].stationID+","+ldata.data.routeRoundWaypoints[i].name+",,"+ldata.data.routeRoundWaypoints[i].lat+","+ldata.data.routeRoundWaypoints[i].lng);
