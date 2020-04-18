@@ -58,7 +58,7 @@ function tripInList(id) {
     }
     return false;
 }
-re = /[A-Za-z]+$/
+re = /[A-Za-z]+/
 gdata = request('GET', routeList);
 $ = cheerio.load(gdata.getBody('utf8'));
 
@@ -95,7 +95,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("luni-")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim()
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
             }else if($$(this).text().split(": ")[0]=="sâmbăta şi duminica"){
@@ -113,7 +113,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("-duminică")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim()
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
 
@@ -132,7 +132,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("sâmbăta:")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim();
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
 
@@ -151,7 +151,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("duminica:")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim();
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
 
@@ -199,7 +199,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("luni-")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim();
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
             }else if($$(this).text().split(": ")[0]=="sâmbăta şi duminica"){
@@ -217,7 +217,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("-duminică")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim();
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
 
@@ -236,7 +236,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("sâmbăta:")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim();
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
 
@@ -255,7 +255,7 @@ function processRoute(id,type,url){
                 $$(".ultima-cursa").find("li").each(function(){
                     if($$(this).text().indexOf("duminica:")!=-1){
                         str = (incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim();
-                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])) data.frequencies.push(str);
+                        if(!re.test($$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1])&&str.length>=14) data.frequencies.push(str);
                     }
                 }) }
 
