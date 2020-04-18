@@ -334,7 +334,7 @@ console.log("Deleted "+x+" useless stop_times");
 console.log("Filtering trips");
 x=0;
 for (var i = data.trips.length - 1; i >= 0; i--) {
-    if(!tripHasST(data.trips[i].split(',')[0])){ x++; data.trips.splice(i,1); }
+    if(!tripHasST(data.trips[i].split(',')[2])){ x++; data.trips.splice(i,1); }
 }
 console.log("Deleted "+x+" useless trips");
 
