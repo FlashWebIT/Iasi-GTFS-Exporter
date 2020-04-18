@@ -1,0 +1,99 @@
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>FeedValidator: iasi.zip</title>
+<style>
+body {font-family: Georgia, serif; background-color: white}
+.path {color: gray}
+div.problem {max-width: 500px}
+table.dump td,th {background-color: khaki; padding: 2px; font-family:monospace}
+table.dump td.problem,th.problem {background-color: dc143c; color: white; padding: 2px; font-family:monospace}
+table.count_outside td {vertical-align: top}
+table.count_outside {border-spacing: 0px; }
+table {border-spacing: 5px 0px; margin-top: 3px}
+h3.issueHeader {padding-left: 0.5em}
+h4.issueHeader {padding-left: 1em}
+.pass {background-color: lightgreen}
+.fail {background-color: yellow}
+.notice {background-color: yellow}
+.pass, .fail {font-size: 16pt}
+.header {background-color: white; font-family: Georgia, serif; padding: 0px}
+th.header {text-align: right; font-weight: normal; color: gray}
+.footer {font-size: 10pt}
+</style>
+</head>
+<body>
+GTFS validation results for feed:<br>
+<code><span class="path">//redacted//</span><b>iasi.zip</b></code><br>
+FeedValidator extension used: extensions.googletransit
+<br><br>
+<table>
+<tr><th class="header">Agencies:</th><td class="header"><a href="https://www.sctpiasi.ro/">CTP Iaşi</a></td></tr>
+<tr><th class="header">Routes:</th><td class="header">33</td></tr>
+<tr><th class="header">Stops:</th><td class="header">301</td></tr>
+<tr><th class="header">Trips:</th><td class="header">64</td></tr>
+<tr><th class="header">Shapes:</th><td class="header">49</td></tr>
+<tr><th class="header">Effective:</th><td class="header">March 01, 2020 to December 30, 2020</td></tr>
+</table>
+<br>
+During the upcoming service dates Sat Apr 18 to Tue Jun 16:
+<table>
+<tr><th class="header">Average trips per date:</th><td class="header">2505</td></tr>
+<tr><th class="header">Most trips on a date:</th><td class="header">2865, on 42 service dates (Mon Apr 20, Tue Apr 21, Wed Apr 22, ...)</td></tr>
+<tr><th class="header">Least trips on a date:</th><td class="header">1666, on 18 service dates (Sat Apr 18, Sun Apr 19, Sat Apr 25, ...)</td></tr>
+</table>
+<br>
+<span class="fail">Found these problems:</span>
+<table class="count_outside">
+<tr><td><span class="fail">154 warnings</span></td></tr>
+<tr><td>
+<table><tr><td>2</td><td><a href="#WarningInvalidValue">Invalid Values</a></td></tr>
+<tr><td>1</td><td><a href="#WarningNoServiceExceptions">No Service Exceptions</a></td></tr>
+<tr><td>36</td><td><a href="#WarningOtherProblem">Other Problems</a></td></tr>
+<tr><td>114</td><td><a href="#WarningTooFastTravel">Too Fast Travels</a></td></tr>
+<tr><td>1</td><td><a href="#WarningUnrecognizedColumn">Unrecognized Column</a></td></tr>
+</table>
+</td>
+</table>
+<br><br>
+<h3 class="issueHeader">Warnings:</h3><h4 class="issueHeader"><a name="WarningInvalidValue">Invalid Value</a></h4><ul>
+<li><div class="problem">Invalid value f9c0c1 in field <code>route_color</code><br>The route_text_color and route_color should be set to contrasting colors, as they are used as the text and background color (respectively) for displaying route names.  When left blank, route_text_color defaults to 000000 (black) and route_color defaults to FFFFFF (white).  A common source of issues here is setting route_color to a dark color, while leaving route_text_color set to black.  In this case, route_text_color should be set to a lighter color like FFFFFF to ensure a legible contrast between the two.</div>in line 4 of <code>routes.txt</code><br>
+<table class="dump"><tr><th>route_id</th><th>agency_id</th><th>route_short_name</th><th>route_type</th><th class="problem">route_color</th><th>route_text_color</th><th>route_long_name</th><th>route_url</th></tr>
+<tr><td>19</td><td>1</td><td>6</td><td>0</td><td class="problem">f9c0c1</td><td>ffffff</td><td>Dacia - Gara - Arcu - Târgu Cucu</td><td>https://www.sctpiasi.ro//trasee/19/tramvaiul-6</td></tr></table>
+<br></li>
+<li><div class="problem">Invalid value d2e288 in field <code>route_color</code><br>The route_text_color and route_color should be set to contrasting colors, as they are used as the text and background color (respectively) for displaying route names.  When left blank, route_text_color defaults to 000000 (black) and route_color defaults to FFFFFF (white).  A common source of issues here is setting route_color to a dark color, while leaving route_text_color set to black.  In this case, route_text_color should be set to a lighter color like FFFFFF to ensure a legible contrast between the two.</div>in line 6 of <code>routes.txt</code><br>
+<table class="dump"><tr><th>route_id</th><th>agency_id</th><th>route_short_name</th><th>route_type</th><th class="problem">route_color</th><th>route_text_color</th><th>route_long_name</th><th>route_url</th></tr>
+<tr><td>13</td><td>1</td><td>8</td><td>0</td><td class="problem">d2e288</td><td>ffffff</td><td>Copou - Tudor Vladimirescu - Baza 3</td><td>https://www.sctpiasi.ro//trasee/13/tramvaiul-8</td></tr></table>
+<br></li>
+</ul>
+<h4 class="issueHeader"><a name="WarningNoServiceExceptions">No Service Exceptions</a></h4><ul>
+<li><div class="problem">All services are defined on a weekly basis from 2020-03-01 to 2020-12-30 with no single day variations. If there are exceptions such as holiday service dates please ensure they are listed in calendar_dates.txt</div><br></li>
+</ul>
+<h4 class="issueHeader"><a name="WarningOtherProblem">Other Problem</a></h4><ul>
+<li><div class="problem">The trip with the trip_id "10TLV" only has one stop on it; it should have at least one more stop so that the riders can leave!</div><br></li>
+<li><div class="problem">The trip with the trip_id "19TLV" only has one stop on it; it should have at least one more stop so that the riders can leave!</div><br></li>
+<li><div class="problem">The trip with the trip_id "6RLV" only has one stop on it; it should have at least one more stop so that the riders can leave!</div><br></li>
+<li><div class="problem">The trip with the trip_id "41TLV" only has one stop on it; it should have at least one more stop so that the riders can leave!</div><br></li>
+<li><div class="problem">The trip with the trip_id "25RLV" only has one stop on it; it should have at least one more stop so that the riders can leave!</div><br></li>
+<li>and 31 more of this type.</ul>
+<h4 class="issueHeader"><a name="WarningTooFastTravel">Too Fast Travel</a></h4><ul>
+<li><div class="problem">High speed travel detected in trip 16TSD: Pacurari to Popas Pacurari. 1008 meters in 24 seconds. (151 km/h).</div><br></li>
+<li><div class="problem">High speed travel detected in trip 16RSD: Popas Pacurari to Pacurari. 999 meters in 9 seconds. (400 km/h).</div><br></li>
+<li><div class="problem">High speed travel detected in trip 16RSD: Petru Poni to Blocuri Pacurari. 991 meters in 30 seconds. (119 km/h).</div><br></li>
+<li><div class="problem">High speed travel detected in trip 6RSD: Piata Independentei to Universitate - sens Agronomie. 970 meters in 24 seconds. (145 km/h).</div><br></li>
+<li><div class="problem">High speed travel detected in trip 10RSD: Piata Independentei to Universitate - sens Agronomie. 970 meters in 25 seconds. (140 km/h).</div><br></li>
+<li>and 109 more of this type.</ul>
+<h4 class="issueHeader"><a name="WarningUnrecognizedColumn">Unrecognized Column</a></h4><ul>
+<li><div class="problem">Unrecognized column <code>agency_email</code> in file <code>agency.txt</code>. This might be a misspelled column name (capitalization matters!). Or it could be extra information (such as a proposed feed extension) that the validator doesn't know about yet. Extra information is fine; this warning is here to catch misspelled optional column names.</div>in line 1 of <code>agency.txt</code><br>
+<table class="dump"><tr><th>agency_id</th><th>agency_name</th><th>agency_url</th><th>agency_timezone</th><th>agency_lang</th><th>agency_phone</th><th>agency_fare_url</th><th class="problem">agency_email</th></tr>
+<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="problem"></td></tr></table>
+<br></li>
+</ul>
+
+<div class="footer">
+Generated by <a href="https://github.com/google/transitfeed/wiki/FeedValidator">
+FeedValidator</a> version 1.2.15 on April 18, 2020 at 07:32 PM GTB Summer Time.
+</div>
+</body>
+</html>
