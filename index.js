@@ -19,7 +19,7 @@ var data = {
         "stop_id,stop_name,stop_desc,stop_lat,stop_lon"
     ],
     "routes": [
-        "route_id,agency_id,route_short_name,route_type,route_color,route_text_color,route_long_name"
+        "route_id,agency_id,route_short_name,route_type,route_color,route_text_color,route_long_name,route_url"
     ],
     "trips": [
         "route_id,service_id,trip_id,trip_headsign,direction_id,shape_id"
@@ -52,26 +52,114 @@ function stopInList(id) {
     return false;
 }
 
+function tripInList(id) {
+    for (var i = 0; i < data.trips.length; i++) {
+        if (data.trips[i].split(',')[2] == id) return true;
+    }
+    return false;
+}
+
 gdata = request('GET', routeList);
 $ = cheerio.load(gdata.getBody('utf8'));
 
 var localStopMatch={};
-// a trip can have multiple frequencies but not multiple schedules! Beware
-function processRoute(id,type){
+
+function processRoute(id,type,url){
+    rdata = request('GET', url);
+    $$ = cheerio.load(rdata.getBody('utf8'));
 	console.log('Processing route '+id);
 	var ldata = request('GET', apiURL+"route/byId/"+id);
 	ldata = JSON.parse(ldata.getBody('utf8'));
-	if(!ldata.type) return false;
-	if(ldata.data.routeWayLength){
+    if(!(ldata.type&&$$(".frecventa")&&$$(".prima-cursa")&&$$(".ultima-cursa"))) return false;
+	
+	if(ldata.data.routeWayLength&&ldata.data.routeWaypoints.length){
 		if(!localStopMatch[id]) localStopMatch[id] = [];
 		localStopMatch[id][0] = ldata.data.routeWaypoints;
+
+        $$(".frecventa").find("li").each(function(){
+
+            var hw = parseInt($$(this).text().split(": ")[1].replace(" min","").split("-")[$$(this).text().split(": ")[1].replace(" min","").split("-").length-1]);
+
+            if($$(this).text().split(": ")[0].indexOf("luni-vineri")!=-1){
+                tid = id+"TLV";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("luni-")!=-1){
+                        data.trips.push(id+",LV,"+tid+","+$$(this).text().split(": ")[1].split(",")[$$(this).text().split(": ")[1].split(",").length-1].match(/\S+/g)[0]+",0,"+id+".0");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("luni-")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+            }else if($$(this).text().split(": ")[0]=="sâmbăta şi duminica"){
+                tid = id+"TSD";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("-duminică")!=-1){
+                        data.trips.push(id+",SD,"+tid+","+$$(this).text().split(": ")[1].split(",")[$$(this).text().split(": ")[1].split(",").length-1].match(/\S+/g)[0]+",0,"+id+".0");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("-duminică")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+
+            }else if($$(this).text().split(": ")[0]=="sâmbăta"){
+                tid = id+"TS";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("sâmbăta:")!=-1){
+                        data.trips.push(id+",S,"+tid+","+$$(this).text().split(": ")[1].split(",")[$$(this).text().split(": ")[1].split(",").length-1].match(/\S+/g)[0]+",0,"+id+".0");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("sâmbăta:")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+
+            }else if($$(this).text().split(": ")[0]=="duminica"){
+                tid = id+"TD";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("duminica:")!=-1){
+                        data.trips.push(id+",D,"+tid+","+$$(this).text().split(": ")[1].split(",")[$$(this).text().split(": ")[1].split(",").length-1].match(/\S+/g)[0]+",0,"+id+".0");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("duminica:")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+
+            }
+
+        })
+
 		dat = new Date(0);
-		console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeWaypoints[0].name);
+        d = dat.toLocaleTimeString("ro-RO").replace(" AM","")
+        data.stop_times.push(id+"TLV"+","+d+","+d+","+ldata.data.routeWaypoints[0].stationID+",1");
 		for (var i = 0; i < ldata.data.routeWaypoints.length; i++) {
 			if(i!=ldata.data.routeWaypoints.length-1){
 				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeWaypoints[i].lng)+" "+parseFloat(ldata.data.routeWaypoints[i].lat)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lat)).toString();
 			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 5);
-			    console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeWaypoints[i+1].name);
+                d = dat.toLocaleTimeString("ro-RO").replace(" AM","")
+			    if(ldata.data.routeWaypoints[i+1].stationID) data.stop_times.push(id+"TLV"+","+d+","+d+","+ldata.data.routeWaypoints[i+1].stationID+","+(i+2));
 			}
 			if(ldata.data.routeWaypoints[i].stationID&&!stopInList(ldata.data.routeWaypoints[i].stationID))
 				data.stops.push(ldata.data.routeWaypoints[i].stationID+","+ldata.data.routeWaypoints[i].name+",,"+ldata.data.routeWaypoints[i].lat+","+ldata.data.routeWaypoints[i].lng);
@@ -80,17 +168,95 @@ function processRoute(id,type){
 			data.shapes.push(id+".0,"+ldata.data.routeWayCoordinates[i].lat+","+ldata.data.routeWayCoordinates[i].lng+","+i);
 		}
 	}
-	if(ldata.data.routeRoundWayLength){
+	if(ldata.data.routeRoundWayLength&&ldata.data.routeRoundWaypoints.length){
 		if(!localStopMatch[id]) localStopMatch[id] = [];
 		localStopMatch[id][0] = ldata.data.routeWaypoints;
+
+        $$(".frecventa").find("li").each(function(){
+
+            var hw = parseInt($$(this).text().split(": ")[1].replace(" min","").split("-")[$$(this).text().split(": ")[1].replace(" min","").split("-").length-1]);
+
+            if($$(this).text().split(": ")[0].indexOf("luni-vineri")!=-1){
+                tid = id+"RLV";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("luni-")!=-1){
+                        data.trips.push(id+",LV,"+tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[0]+",1,"+id+".1");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("luni-")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+            }else if($$(this).text().split(": ")[0]=="sâmbăta şi duminica"){
+                tid = id+"RSD";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("-duminică")!=-1){
+                        data.trips.push(id+",SD,"+tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[0]+",1,"+id+".1");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("-duminică")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+
+            }else if($$(this).text().split(": ")[0]=="sâmbăta"){
+                tid = id+"RS";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("sâmbăta:")!=-1){
+                        data.trips.push(id+",S,"+tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[0]+",1,"+id+".1");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("sâmbăta:")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+
+            }else if($$(this).text().split(": ")[0]=="duminica"){
+                tid = id+"RD";
+                if(!tripInList(tid)){
+                
+                var incomplete="";
+                $$(".prima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("duminica:")!=-1){
+                        data.trips.push(id+",D,"+tid+","+$$(this).text().split(": ")[1].split(",")[0].match(/\S+/g)[0]+",1,"+id+".1");
+                        incomplete = tid+","+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,";
+                    }
+                })
+                $$(".ultima-cursa").find("li").each(function(){
+                    if($$(this).text().indexOf("duminica:")!=-1){
+                        data.frequencies.push((incomplete+$$(this).text().split(": ")[1].split(",")[1].match(/\S+/g)[1]+":00,"+(hw*60)).trim());
+                    }
+                }) }
+
+            }
+
+        })
+
 		dat = new Date(0);
-		console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeWaypoints[0].name);
+        d = dat.toLocaleTimeString("ro-RO").replace(" AM","");
+        data.stop_times.push(id+"RLV"+","+d+","+d+","+ldata.data.routeRoundWaypoints[0].stationID+",1");
 		localStopMatch[id][1] = ldata.data.routeRoundWaypoints;
 		for (var i = 0; i < ldata.data.routeRoundWaypoints.length; i++) {
 			if(i!=ldata.data.routeRoundWaypoints.length-1){
 				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeRoundWaypoints[i].lng)+" "+parseFloat(ldata.data.routeRoundWaypoints[i].lat)+" "+parseFloat(ldata.data.routeRoundWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeRoundWaypoints[i+1].lat)).toString();
 			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 5);
-			    console.log(dat.toLocaleTimeString("ro-RO").replace(" AM","")+" "+ldata.data.routeRoundWaypoints[i+1].name);
+                d = dat.toLocaleTimeString("ro-RO").replace(" AM","");
+			    if(ldata.data.routeRoundWaypoints[i+1].stationID) data.stop_times.push(id+"RLV"+","+d+","+d+","+ldata.data.routeRoundWaypoints[i+1].stationID+","+(i+2));
 			}
 			if(ldata.data.routeRoundWaypoints[i].stationID&&!stopInList(ldata.data.routeRoundWaypoints[i].stationID))
 				data.stops.push(ldata.data.routeRoundWaypoints[i].stationID+","+ldata.data.routeRoundWaypoints[i].name+",,"+ldata.data.routeRoundWaypoints[i].lat+","+ldata.data.routeRoundWaypoints[i].lng);
@@ -101,21 +267,17 @@ function processRoute(id,type){
 	}
 }
 
-$('.tramvaie').find('ul').find('li').each(function(){
-	data.routes.push($(this).find('a').attr('href').split('/')[2]+",1,"+$(this).find('.track_number').text()+",0,"+$(this).find('.track_number').attr('style').split('background:')[1].trim()+",#ffffff,"+$(this).find('.track_summary').text().trim());
+$('.tramvaie').find('ul').find('li').eq(0).each(function(){
+	data.routes.push($(this).find('a').attr('href').split('/')[2]+",1,"+$(this).find('.track_number').text()+",0,"+$(this).find('.track_number').attr('style').split('background:')[1].trim()+",#ffffff,"+$(this).find('.track_summary').text().trim()+",https://www.sctpiasi.ro/"+$(this).find('a').attr('href'));
 })
 
-$('.autobuze').find('ul').find('li').each(function(){
-	data.routes.push($(this).find('a').attr('href').split('/')[2]+",1,"+$(this).find('.track_number').text()+",3,#a2238e,#ffffff,"+$(this).find('.track_summary').text().trim());
+$('.autobuze').find('ul').find('li').eq(0).each(function(){
+	data.routes.push($(this).find('a').attr('href').split('/')[2]+",1,"+$(this).find('.track_number').text()+",3,#a2238e,#ffffff,"+$(this).find('.track_summary').text().trim()+",https://www.sctpiasi.ro/"+$(this).find('a').attr('href'));
 })
 
 for (var i = 1; i < data.routes.length; i++) {
-	processRoute(data.routes[i].split(',')[0],data.routes[i].split(',')[3]);
+	processRoute(data.routes[i].split(',')[0],data.routes[i].split(',')[3],data.routes[i].split(',')[data.routes[i].split(',').length-1]);
 }
-
-//processRoute(data.routes[1].split(',')[0],data.routes[1].split(',')[3]);
-//processRoute(data.routes[2].split(',')[0],data.routes[2].split(',')[3]);
-//processRoute(data.routes[10].split(',')[0],data.routes[10].split(',')[3]);
 
 function msToHMS(ms) {
     var seconds = ms / 1000;
@@ -129,12 +291,12 @@ function msToHMS(ms) {
 dirn = start.getTime();
 
 if (!fs.existsSync("./output/" + dirn)) {
-    //console.log("Creating output subdirectory " + dirn);
-    //fs.mkdirSync("./output/" + dirn);
+    console.log("Creating output subdirectory " + dirn);
+    fs.mkdirSync("./output/" + dirn);
 }
 
 for (property in data) {
-    //fs.writeFileSync("./output/" + dirn + "/" + property + ".txt", data[property].join("\r\n"));
+    fs.writeFileSync("./output/" + dirn + "/" + property + ".txt", data[property].join("\r\n"));
 }
 
 now = new Date();
