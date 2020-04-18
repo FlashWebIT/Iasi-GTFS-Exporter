@@ -45,6 +45,15 @@ var data = {
     ]
 };
 
+usedStops = [];
+
+function usedStops(id){
+    for (var i = 0; i < usedStops.length; i++) {
+        if(usedStops[i]==id) return true;
+    }
+    return false;
+}
+
 function stopInList(id) {
     for (var i = 0; i < data.stops.length; i++) {
         if (data.stops[i].split(',')[0] == id) return true;
