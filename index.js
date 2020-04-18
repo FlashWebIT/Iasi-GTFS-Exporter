@@ -267,11 +267,11 @@ function processRoute(id,type,url){
 	}
 }
 
-$('.tramvaie').find('ul').find('li').eq(0).each(function(){
+$('.tramvaie').find('ul').find('li').each(function(){
 	data.routes.push($(this).find('a').attr('href').split('/')[2]+",1,"+$(this).find('.track_number').text()+",0,"+$(this).find('.track_number').attr('style').split('background:')[1].trim()+",#ffffff,"+$(this).find('.track_summary').text().trim()+",https://www.sctpiasi.ro/"+$(this).find('a').attr('href'));
 })
 
-$('.autobuze').find('ul').find('li').eq(0).each(function(){
+$('.autobuze').find('ul').find('li').each(function(){
 	data.routes.push($(this).find('a').attr('href').split('/')[2]+",1,"+$(this).find('.track_number').text()+",3,#a2238e,#ffffff,"+$(this).find('.track_summary').text().trim()+",https://www.sctpiasi.ro/"+$(this).find('a').attr('href'));
 })
 
