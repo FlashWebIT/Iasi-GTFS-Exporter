@@ -58,6 +58,14 @@ function tripInList(id) {
     }
     return false;
 }
+
+function tripHasST(id) {
+    for (var i = 0; i < data.stop_times.length; i++) {
+        if (data.stop_times[i].split(',')[0] == id) return true;
+    }
+    return false;
+}
+
 re = /[A-Za-z]+/
 gdata = request('GET', routeList);
 $ = cheerio.load(gdata.getBody('utf8'));
@@ -165,7 +173,7 @@ function processRoute(id,type,url){
 		for (var i = 0; i < ldata.data.routeWaypoints.length; i++) {
 			if(i!=ldata.data.routeWaypoints.length-1){
 				var result = shell.execSync('cd '+__dirname+"; node external.js "+(type=="3"?"TRAM":"BUS")+" "+parseFloat(ldata.data.routeWaypoints[i].lng)+" "+parseFloat(ldata.data.routeWaypoints[i].lat)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lng)+" "+parseFloat(ldata.data.routeWaypoints[i+1].lat)).toString();
-			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 5);
+			    dat.setSeconds(dat.getSeconds() + parseInt(result.trim()) + 20);
                 d = dat.toLocaleTimeString("ro-RO").replace(" AM","")
 			    if(ldata.data.routeWaypoints[i+1].stationID) data.stop_times.push(id+"TLV"+","+d+","+d+","+ldata.data.routeWaypoints[i+1].stationID+","+(i+2));
 			}
@@ -305,6 +313,35 @@ function msToHMS(ms) {
 }
 
 dirn = start.getTime();
+
+console.log("Filtering stop_times");
+x=0;
+for (var i = data.stop_times.length - 1; i >= 0; i--) {
+    if(!tripInList(data.stop_times[i].split(',')[0])){ x++; data.stop_times.splice(i,1); }
+    else usedStops.push(data.stop_times[i].split(',')[3]);
+}
+console.log("Deleted "+x+" useless stop_times");
+
+console.log("Filtering trips");
+x=0;
+for (var i = data.trips.length - 1; i >= 0; i--) {
+    if(!tripHasST(data.trips[i].split(',')[0])){ x++; data.trips.splice(i,1); }
+}
+console.log("Deleted "+x+" useless trips");
+
+console.log("Filtering frequencies");
+x=0;
+for (var i = data.frequencies.length - 1; i >= 0; i--) {
+    if(!tripInList(data.frequencies[i].split(',')[0])){ x++; data.frequencies.splice(i,1); }
+}
+console.log("Deleted "+x+" useless frequencies");
+
+console.log("Filtering stops");
+x=0;
+for (var i = data.stops.length - 1; i >= 0; i--) {
+    if(!usedStop(data.stops[i].split(',')[0])) { x++; data.stops.splice(i, 1); }
+}
+console.log("Deleted "+x+" useless stops");
 
 if (!fs.existsSync("./output/" + dirn)) {
     console.log("Creating output subdirectory " + dirn);
