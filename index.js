@@ -47,7 +47,7 @@ var data = {
 
 usedStops = [];
 
-function usedStops(id){
+function usedStop(id){
     for (var i = 0; i < usedStops.length; i++) {
         if(usedStops[i]==id) return true;
     }
